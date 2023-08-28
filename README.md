@@ -10,3 +10,11 @@ Added a `collection filters` section that allows to
 - The AJAX request is cache for better performance
 - Styles were loaded from the collections page to avoid rewriting code (DRY approach)
 - Doesn't create conflicts with other sections within the `home page`.
+
+## About
+
+[Store url](https://charlie-caro-test-store.myshopify.com/)
+
+Store password: `reelyi`
+
+File to watch: `/sections/collection-filters-section.liquid`
