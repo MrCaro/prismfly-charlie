@@ -1,0 +1,37 @@
+<section>
+  <ul>
+    {%- for block in section.blocks -%}
+      {%- if block.settings.collection.title -%}
+        <li>
+          <button>
+            {{ block.settings.collection.title }}
+          </button>
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+</section>
+
+{% schema %}
+{
+  "name": "Collection Filter",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "blocks": [
+    {
+      "type": "featured_collection",
+      "name": "t:sections.collection-list.blocks.featured_collection.name",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "t:sections.collection-list.blocks.featured_collection.settings.collection.label"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

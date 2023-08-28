@@ -1,0 +1,148 @@
+
+<style>
+  .collection-filters-section {
+    padding-top: 44px;
+    padding-bottom: 36px;
+  }
+
+  .collection-filters-section ul {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+  }
+
+  .collection-filters-section button {
+    padding: 1rem 2rem;
+    background: none;
+    color: inherit;
+    border: none;
+    border-bottom: solid 3px white;
+    font-family: var(--font-heading-family);
+    cursor: pointer;
+    outline: inherit;
+    min-width: 100px;
+  }
+
+  .collection-filters-section button:hover,
+  button.collection-filter--desktop-active {
+    border-bottom: solid 3px #205389;
+    color: #205389;
+  }
+
+  .collection-filter--desktop {
+    display: none !important;
+  }
+
+  .collection-filter--mobile {
+    display: flex;
+  }
+
+  @media (min-width: 768px) {
+    .collection-filter--desktop {
+      display: flex !important;
+    }
+
+    .collection-filter--mobile {
+      display: none;
+    }
+  }
+</style>
+<section class="collection page-width collection-filters-section">
+  <div class="">
+    {% comment %} desktop tab/button selector {% endcomment %}
+    <ul class="collection-filter--desktop">
+      <li>
+        <button class="collection-filter--desktop-active" data-collection-value="/collections/all">
+          All
+        </button>
+      </li>
+      {% for item in section.blocks %}
+        <li>
+          <button data-collection-value="/collections/{% if item.settings.collection.title != '' %}{{ item.settings.collection.title | downcase }}{% endif %}">
+            {{ item.settings.collection.title }}
+          </button>
+        </li>
+      {% endfor %}
+    </ul>
+    {% comment %} mobile dropdown selector {% endcomment %}
+    <select id="" class="collection-filter--mobile collection--filters">
+      <option value="/collections/all" selected>All</option>
+      {% for item in section.blocks %}
+        <option value="/collections/{% if item.settings.collection.title != '' %}{{ item.settings.collection.title | downcase }}{% endif %}">{{ item.settings.collection.title }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</section>
+
+<section>
+  <div id="productsByCollection"></div>
+</section>
+
+<script async defer>
+  $(document).ready(function () {
+    //first call page render display all collections
+    let collection_url = window.location.origin + '/collections/all'
+    const active_class_desktop = 'collection-filter--desktop-active'
+
+    //avoids reloading page when making GET request
+    $.fn.fetchProducts = function(fetch_url) {
+      $.ajax({
+        url:fetch_url,
+        type:'GET',
+        cache: true, //we want to cache the calls to the collections types
+        success: function(data){
+          $('#productsByCollection').html($(data).find('.product-grid-container').html())
+        }
+      });
+    }
+
+    $.fn.fetchProducts(collection_url)
+
+    //desktop tab/button selector
+    $('[data-collection-value]').each(function (index) {
+        var $this = $(this);
+        $this.on("click", function (e) {
+          $('.' + active_class_desktop).removeClass(active_class_desktop);
+          $(e.currentTarget).addClass(active_class_desktop)
+          let value = $(this).data('collection-value') //value of the filters to display products within that category/tag
+          collection_url = window.location.origin //overrides default value on first page load
+          let fetch_url = collection_url + value
+          //sync mobile dropdown
+          $('.collection--filters').val(value)
+          $.fn.fetchProducts(fetch_url)    
+        });
+    });
+
+    //mobile dropdown selector
+    $('body').on('change', '.collection--filters', function () {
+      let value = this.value //value of the filters to display products within that category/tag
+      collection_url = window.location.origin //overrides default value on first page load
+      let fetch_url = collection_url + value
+      //start: sync desktop tab selector
+      $('.' + active_class_desktop).removeClass(active_class_desktop)
+      let buttonHTML = $('[data-collection-value="' + value + '"]').get()
+      buttonHTML[0].classList.add(active_class_desktop)
+      //end: sync desktop tab selector
+      $.fn.fetchProducts(fetch_url)      
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Collection filters",
+  "blocks": [
+    {
+      "type": "featured_collection",
+      "name": "t:sections.collection-list.blocks.featured_collection.name",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "t:sections.collection-list.blocks.featured_collection.settings.collection.label"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
